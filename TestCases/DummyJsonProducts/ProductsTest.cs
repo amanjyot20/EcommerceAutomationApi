@@ -11,6 +11,11 @@ namespace ECommerseApiAutomation.TestCases.DummyJsonProducts
 {
     public class ProductsTest
     {
+
+        public ProductsTest() 
+        {
+            new JsonSerializerOptions {PropertyNameCaseInsensitive = true};
+        }
         [Fact]
         public async Task GetAllPRoducts()
         {
@@ -36,11 +41,11 @@ namespace ECommerseApiAutomation.TestCases.DummyJsonProducts
           
             var responsBody = await response.Content.ReadAsStringAsync();
             var jsonBdy = JsonSerializer.Deserialize<DummyProduct>(responsBody, 
-                new JsonSerializerOptions 
-                { PropertyNameCaseInsensitive = true 
-                });
                 
-            var discountProt = jsonBdy.Product
+                
+            var discountProt = jsonBdy.Products
+                .Where(id=> id.Id == 0).FirstOrDefault()
+                .Se
                 
                 
                 
