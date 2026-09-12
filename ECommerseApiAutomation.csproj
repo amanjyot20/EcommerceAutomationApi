@@ -20,4 +20,13 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Configuration\" />
+    <Folder Include="ApiClientServer\" />
+    <Folder Include="RequestPayloads\" />
+    <Folder Include="Utilities\" />
+    <Folder Include="TestData\" />
+    <Folder Include="Constants\" />
+  </ItemGroup>
+
 </Project>
