@@ -7,69 +7,79 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Xunit;
+using ECommerseApiAutomation.Utilities;
 namespace ECommerseApiAutomation.TestCases.DummyJsonProducts
 {
     public class ProductsTest
     {
-
+        private static JsonSerializerOptions _JsonOptions;
+        private static CartHttpClient _cartHttpClient;
         public ProductsTest() 
         {
-            new JsonSerializerOptions {PropertyNameCaseInsensitive = true};
+            _cartHttpClient = new CartHttpClient();
+            _JsonOptions = new JsonSerializerOptions {PropertyNameCaseInsensitive = true};
         }
         [Fact]
+
         public async Task GetAllPRoducts()
         {
-            HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri("https://dummyjson.com/");
-            var response = await client.GetAsync("Products");
+            //Arrange
+            string expectedTitle = "Essence Mascara Lash Princess";
+            //Act
+            var response = await _cartHttpClient.GetHttpClient("Products");
+            var responseString = await response.Content.ReadAsStringAsync();
+            var responseBody = JsonSerializer.Deserialize<DummyProduct>(responseString, _JsonOptions);
+            var actualTitle = responseBody.Products
+                .Where(p => p.Id == 1)
+                .Select(c => c.Title).FirstOrDefault();
+            //Assertion
             Assert.Equal(200, (double)response.StatusCode);
+            Assert.Equal(expectedTitle, actualTitle);
+
         }
         [Fact]
         public async Task CreateNewProduct()
         {
-            HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri("https://dummyjson.com/");
-            var requestBody = new
-            {
-                title = "BMW Pencil"
-                /* other product data */
-            };
-            var jsonPayload = JsonSerializer.Serialize(requestBody);
-            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+            int ids = 195;
+            var response = await _cartHttpClient.CreateProductHttpClient("Products/add");
+            var responseString = await response.Content.ReadAsStringAsync();
 
-            var response = await client.PostAsync("products/add", content);
-          
-            var responsBody = await response.Content.ReadAsStringAsync();
-            var jsonBdy = JsonSerializer.Deserialize<DummyProduct>(responsBody, 
+            //
+            var responseBody = JsonSerializer.Deserialize<Product>(responseString, _JsonOptions);      
+           // Assert.Equal(201, (double)response.StatusCode);
+           // var actualId = responseBody.Id;
                 
-                
-            var discountProt = jsonBdy.Products
-                .Where(id=> id.Id == 0).FirstOrDefault()
-                .Se
-                
-                
-                
-
-  
-          Assert.Equal(201, (double)response.StatusCode);
+           // Assert.Equal(ids, actualId);
         }
         public async Task GetSingleProduct()
-        {
-            HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri("https://dummyjson.com/");
-            var response = await client.GetAsync("products/1");
-            var responsBody = await response.Content.ReadAsStringAsync();
-            var jsonBdy = JsonSerializer.Deserialize<DummyProduct>(responsBody,
-                new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+       {
+            string expectedBrand = "Essence";
+            var response = await _cartHttpClient.GetHttpClient("Products/1");
+            var responseString = await response.Content.ReadAsStringAsync();
+            var responseBody = JsonSerializer.Deserialize<DummyProduct>(responseString, _JsonOptions);
+            var actualBrand= responseBody.Products
+                .Where(p => p.Id == 1)
+                .Select(c => c.Brand).FirstOrDefault();
+            //Assertion
+            Assert.Equal(200, (double)response.StatusCode);
+            Assert.Equal(expectedBrand, actualBrand);
 
-            var discountProt = jsonBdy.Product.Id == 
-
-
-
-          Assert.Equal(201, (double)response.StatusCode);
         }
+
+        public async Task SearchProduct()
+        {
+            string expectedBrand = "Essence";
+            var response = await _cartHttpClient.GetHttpClient("products/search?q=phone");
+            var responseString = await response.Content.ReadAsStringAsync();
+            var responseBody = JsonSerializer.Deserialize<DummyProduct>(responseString, _JsonOptions);
+            var actualBrand = responseBody.Products
+                .Where(p => p.Id == 1)
+                .Select(c => c.Brand).FirstOrDefault();
+            //Assertion
+            Assert.Equal(200, (double)response.StatusCode);
+            Assert.Equal(expectedBrand, actualBrand);
+
+        }
+       
     }
 }
